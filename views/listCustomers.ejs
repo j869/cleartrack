@@ -1,0 +1,80 @@
+<%- include('partials/header') %>
+
+
+<div class="jumbotron text-center">
+    <div class="container">
+        <h1 class="display-3">Customers</h1>
+
+
+        <br><hr><br>
+        <div class="accordion" id="accordionStayOpenExample">
+
+
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#stayOpen-collapseThree" aria-expanded="false" aria-controls="stayOpen-collapseThree">
+                        Add a new customer
+                    </button>
+                </h2>
+                <div id="stayOpen-collapseThree" class="accordion-collapse collapse ">
+                    <div class="accordion-body">
+                        <form class="item" action="/addCustomer" method="post">
+                            <input type="text" name="fullName"     placeholder="customer name" autocomplete="off" autofocus="true" />
+                            <input type="text" name="homeAddress"  placeholder="home address" autocomplete="off"  />
+                            <input type="text" name="primaryPhone" placeholder="primary phone" autocomplete="off"  />
+                            <input type="text" name="primaryEmail" placeholder="primary email" autocomplete="off"  />
+                            <input type="text" name="contactOther" placeholder="eNum" autocomplete="off"  />
+                            <button class="add" type="submit" name="list" value="submit">add</button>
+                        </form>  
+                    </div>
+                </div>
+            </div>
+
+            <% for (let key in data) { %> <!-- Loop through each property of 'data' (e.g., 'open', 'closed') -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-<%= key %>" aria-expanded="true" aria-controls="collapse-<%= key %>">
+                        <%= key.charAt(0).toUpperCase() + key.slice(1) %> Customers <!-- Capitalize and show section name -->
+                    </button>
+                </h2>
+                <div id="collapse-<%= key %>" class="accordion-collapse collapse show">
+                    <div class="accordion-body">
+                        <table class="table">
+                            <tbody>
+                                <!-- Loop through each customer in the current array (e.g., open or closed) -->
+                                <% if (Array.isArray(data[key])) { %>
+                                    <% data[key].forEach(customer => { %>
+                                        <tr>
+                                            <td><%= customer.id %></td>
+                                            <td><%= customer.full_name %></td>
+                                            <td><%= customer.home_address %></td>
+                                            <td><%= customer.primary_phone %></td>
+                                            <td><%= customer.primary_email %></td>
+                                            <td><%= customer.contact_other %></td>
+                                            <td><%= key %></td>
+                                            <td>
+                                                <form class="item" method="post" action="/updateCustomer/<%= customer.id %>">
+                                                    <button class="update btn btn-primary" type="submit" name="action" value="view">View</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    <% }); %>
+                                <% } else { %>
+                                    <!-- Handle case if it's not an array (fallback) -->
+                                    <tr>
+                                        <td colspan="7">No customers found</td>
+                                    </tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        <% } %> <!-- End main data loop -->
+            
+        </div>
+    </div>
+</div>
+
+
+<%- include('partials/footer') %>

@@ -1,0 +1,223 @@
+<%- include('partials/header') %>
+
+Previous Task(s) was completed <div class="editable" id="dueDate" contenteditable="true" data-record-id="<%= siteContent.job.id %>"><%= siteContent.job.target_date %></div> (x days ago)
+<div class=" ">
+    <% for (let pre in siteContent.job_antecedents) { %>
+        <div class="card w-100">
+            <div class="card-body">
+            <h5 class="card-title"><%= siteContent.job_antecedents[pre].display_text %></h5>
+            <p class="card-text"><div class="editable" id="jobDesc" contenteditable="true" data-record-id="<%= siteContent.job_antecedents[pre].id %>"><%= siteContent.job_antecedents[pre].free_text %></div></p>
+            <a href="<%= baseURL %>/jobs/<%= siteContent.job_antecedents[pre].id %>">update</a>
+            <!-- <a href="#" class="btn btn-primary">Edit</a> -->
+            </div>
+        </div>
+    <% } %>
+    <a href="<%= baseURL %>/addJob?type=parent&jobnum=<%= siteContent.job.id %>" class="btn btn-secondary">Add</a>
+    
+</div>
+
+<div class="jumbotron centered">
+  <div class="container">
+
+
+    <div class="row">
+
+        <!-- TASK ANTECEDENTS LIST -->
+        <div class="col-sm-3">
+            Preparation
+            <div class="d-flex flex-column">
+                <% for (let pr in siteContent.task_antecedents) { %>
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><div class="editable" id="taskTitle" contenteditable="true" data-record-id="<%= siteContent.task_antecedents[pr].id  %>"><%= siteContent.task_antecedents[pr].display_text %></div></h5>
+                        <!-- <p class="card-text">This is another card with title and supporting text below. This card has some additional content to make it slightly taller overall.</p>
+                        <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p> -->
+                    </div>
+                </div>
+                <% } %>
+                <div class="card">
+                    <div class="card-body">
+                        <a href="<%= baseURL %>/addtask?type=parent&jobnum=<%= siteContent.job.id %>" class="btn btn-light">Add New +</a>
+                    </div>
+                </div>      
+            </div>        
+        </div>
+
+
+        <!-- 
+        // swipe right -> means view the next job (you've just finished trenching. do you want to add some notes to the plumbers job?)  the pre-tasks for this next job should be visible on the current page (do you want to go to arrange the plumbers visit with the owner while you're there?)
+        // swipe left means your looking at the history of the job
+        // swipe up & down means your looking through the other jobs you need to do today (or next week) 
+
+
+        // add a search bar . type in a phone number, email, name or address to bring up the current job
+        -->
+
+
+
+
+        <!-- CURRENT JOB CARD -->
+        <div class="col-sm-6">
+            <div class="card text-center">
+                <div class="card-header">
+                    <ul class="nav nav-pills card-header-pills">
+                        <li class="nav-item">
+                        <a class="nav-link active" href="<%= baseURL %>/jobDone/<%= siteContent.job.id %>">Mark Done</a>
+                        <a href="<%= baseURL %>/delJob?jobnum=<%= siteContent.job.id %>" class="btn btn-secondary">Delete</a>
+                        </li>
+                        <!-- <li class="nav-item">
+                        <a class="nav-link" href="#">Link</a>
+                        </li> -->
+                        <li class="nav-item">
+                        <!-- <h5><a class="nav-link disabled card-title" aria-disabled="true">Job Card: <div class="editable" id="jobTitle" contenteditable="true">Trenching</div> for </a></h5> -->
+                        <h5><div class="editable" id="jobTitle" contenteditable="true" data-record-id="<%= siteContent.job.id %>"><%= siteContent.job.display_text %></div> for <%= siteContent.job.display_name %></h5>
+                        </li>
+                    </ul>
+                </div>
+
+                
+                <div class="d-flex flex-row">
+                    <div class="card-body">
+                        <p class="card-text"><div class="editable" id="jobDesc" contenteditable="true" data-record-id="<%= siteContent.job.id %>"><%= siteContent.job.free_text %></div></p>
+                    </div>
+                    
+                    <!-- Conversation and attachments -->
+                    <ul class="list-group list-group-flush">
+                        <% for (let con in siteContent.job.conversation) { %>
+                            <% 
+                                let maxLength = 16;
+                                let origiMessage = siteContent.job.conversation[con].message_text ;
+                                let truncMessage = origiMessage.length > maxLength ? origiMessage.substr(0, maxLength - 3) + '...' : origiMessage;
+                            %>
+                            <li class="list-group-item"><strong><%= siteContent.job.conversation[con].display_name %></strong>: <%= truncMessage %> 
+                                <% for (let att in siteContent.job.conversation[con].attachment) { %>
+                                    <a href="<%= siteContent.job.conversation[con].attachment[att].link %>"><img src="<%= siteContent.job.conversation[con].attachment[att].thumbnail %>" width="20" height="20"></a></li>
+                                <% } %>
+                        <% } %>
+                    </ul>   
+                </div>  
+                <div>
+                    Person Responsible
+                    <h5 class="card-title"><div class="editable" id="jobOwner" contenteditable="true" data-record-id="<%= siteContent.job.id  %>"><%= siteContent.job.display_name %></div></h5>
+                </div>
+
+                <!-- SLIDER  -->
+                <!-- https://stackoverflow.com/questions/65875721/ho-can-i-add-two-values-in-bootstrap-range-slider -->
+                <div class="card-body">
+                    <h5>Reminder</h5>
+                    <div id="slider-outer-div">
+                        <div id="slider-max-label" class="slider-label"></div>
+                        <div id="slider-min-label" class="slider-label"></div>
+                        <div id="slider-div">
+                            <div>1 Day</div>
+                            <div>
+                                <input id="ex2" type="text" data-slider-min="1"
+                                    data-slider-max="30" data-slider-value="[<%= siteContent.job.reminder.escalation1_interval %>,<%= siteContent.job.reminder.escalation2_interval %> ]"
+                                    data-slider-tooltip="hide" />
+                            </div>
+                            <div>30 Days</div>
+                        </div>
+                    </div>
+                </div>  
+
+            </div>
+        </div>
+
+
+        <!-- TASK DECENDANTS LIST -->
+        <div class="col-sm-3">
+            Follow up
+            <div class="d-flex flex-column">
+                <% for (let po in siteContent.task_decendants) { %>
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title"><div class="editable" id="taskTitle" contenteditable="true" data-record-id="<%= siteContent.task_decendants[po].id  %>"><%= siteContent.task_decendants[po].display_text %></div></h5>
+                            <!-- <p class="card-text">This is another card with title and supporting text below. This card has some additional content to make it slightly taller overall.</p>
+                            <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p> -->
+                        </div>
+                    </div>
+                <% } %>    
+                <div class="card">
+                    <div class="card-body">
+                        <a href="<%= baseURL %>/addtask?type=child&jobnum=<%= siteContent.job.id %>" class="btn btn-light">Add New +</a>
+                    </div>
+                </div>   
+            </div>        
+        </div>
+
+    </div>
+    
+
+
+
+    </div>
+</div>
+
+Next Task
+<div class="d-flex flex-row">
+    <% for (let post in siteContent.job_decendants) { %>
+        <div class="card w-100">
+            <div class="card-body">
+            <h5 class="card-title"><%= siteContent.job_decendants[post].display_text %></h5>
+            <p class="card-text"><div class="editable" id="jobDesc" contenteditable="true" data-record-id="<%= siteContent.job_decendants[post].id  %>"><%= siteContent.job_decendants[post].free_text %></div></p>
+            <a href="<%= baseURL %>/jobs/<%= siteContent.job_decendants[post].id %>" class="btn btn-light">Edit</a>
+            </div>
+        </div>
+    <% } %>
+    <a href="<%= baseURL %>/addJob?type=child&jobnum=<%= siteContent.job.id %>" class="btn btn-secondary">Add</a>
+</div>
+
+
+
+
+
+
+
+
+<script>
+ 
+
+
+        //add listener to all editable fields.  When field changes, notify the database
+        document.addEventListener('DOMContentLoaded', function() {
+            const editableElements = document.querySelectorAll('.editable');
+            editableElements.forEach(function(element) {
+                element.addEventListener('dblclick', function(event) {
+                    event.preventDefault();    // Prevent default behavior
+                    event.target.contentEditable = true;  // Make the element editable
+                    event.target.focus();    // Set focus to the element
+                });
+                element.addEventListener('blur', function(event) {
+                    // When the element loses focus, save the updated value
+                    console.log('a1   ');
+                    const newValue = event.target.textContent;
+                    const fieldID = event.target.id;
+                    const recordID = event.target.getAttribute('data-record-id');
+                    // Make an HTTP GET request to the server to update the database
+                    console.log('a5   ');
+                    fetch(`/update?fieldID=${fieldID}&newValue=${newValue}&whereID=${recordID}`)
+                        .then(response => {
+                            if (response.ok) {
+                                console.log('Database updated successfully.');
+                            } else {
+                                throw new Error('Failed to update database.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+                    console.log('a9   ');
+
+                });
+            });
+        });
+
+
+</script>
+
+
+
+<%- include('partials/footer') %>
+
+
+
